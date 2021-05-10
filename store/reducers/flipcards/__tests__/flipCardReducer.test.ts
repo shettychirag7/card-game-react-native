@@ -21,6 +21,7 @@ describe("flipCardReducer tests", () => {
     expect(actual.data).toHaveLength(0);
     expect(actual.firstFlip).toBeUndefined();
     expect(actual.secondFlip).toBeUndefined();
+    expect(actual.complete).toEqual(false);
   });
   it("must generate random pair array and assign it to data state along with following properties: enabled, flipped, id, value", () => {
     const actual = flipCardReducer(undefined, {
@@ -120,5 +121,22 @@ describe("flipCardReducer tests", () => {
     );
     expect(actual.data[0].flipped).toEqual(false);
     expect(actual.data[1].flipped).toEqual(false);
+  });
+  it("on last flip must set complete to true", () => {
+    const actual = flipCardReducer(
+      {
+        data: [
+          { id: 0, flipped: true, enabled: true, value: 1 },
+          { id: 1, flipped: true, enabled: true, value: 2 },
+          { id: 2, flipped: false, enabled: true, value: 3 },
+        ],
+        firstFlip: { id: 0, flipped: true, enabled: true, value: 1 },
+      },
+      {
+        type: types.SET_SECOND_FLIP,
+        payload: 2,
+      }
+    );
+    expect(actual.complete).toEqual(true);
   });
 });

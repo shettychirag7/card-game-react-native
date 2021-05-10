@@ -1,9 +1,11 @@
 import React from "react";
 import * as reactRedux from "react-redux";
 import { render, fireEvent } from "@testing-library/react-native";
+import { Alert } from "react-native";
 
 import CardGame from "..";
 import { actions as flipActions } from "../../../store/actions/flipcards";
+import { actions as scoreActions } from "../../../store/actions/score";
 
 describe("Card Game component tests", () => {
   const useSelectorSpy = jest.spyOn(reactRedux, "useSelector");
@@ -14,6 +16,7 @@ describe("Card Game component tests", () => {
       data: [],
       firstFlip: undefined,
       secondFlip: undefined,
+      score: 5,
     });
   });
 
@@ -122,5 +125,38 @@ describe("Card Game component tests", () => {
     render(<CardGame />);
     expect(mockFn).toHaveBeenCalledWith(flipActions.disableCards());
     expect(mockFn).toHaveBeenCalledWith(flipActions.resetFlips());
+  });
+  it("must increment score on click card", () => {
+    const mockFn = jest.fn();
+    useDispatchSpy.mockReturnValue(mockFn);
+
+    useSelectorSpy.mockReturnValue({
+      data: [{ id: 0, value: 1, enabled: true, flipped: false }],
+    });
+
+    const { getByText } = render(<CardGame />);
+    fireEvent.press(getByText("1"));
+    expect(mockFn).toHaveBeenCalledWith(scoreActions.incrementScore());
+  });
+  it("must reset score and shuffle cards on click Restart", () => {
+    const mockFn = jest.fn();
+    useDispatchSpy.mockReturnValue(mockFn);
+
+    const { getByText } = render(<CardGame />);
+    fireEvent.press(getByText("Restart"));
+    expect(mockFn).toHaveBeenCalledWith(scoreActions.resetScore());
+    expect(mockFn).toHaveBeenCalledWith(flipActions.getRandomCardValues());
+  });
+  it("shows pop up on all cards flipped", () => {
+    const spy = jest.spyOn(Alert, "alert");
+    const mockFn = jest.fn();
+    useDispatchSpy.mockReturnValue(mockFn);
+    useSelectorSpy.mockReturnValue({
+      data: [{ id: 0, value: 1, enabled: true, flipped: false }],
+      complete: true,
+    });
+
+    render(<CardGame />);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });
