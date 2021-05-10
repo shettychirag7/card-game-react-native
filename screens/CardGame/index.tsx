@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components/native";
+import { TouchableOpacity, Alert } from "react-native";
 
 import { State } from "../../store/reducers";
 import {
@@ -9,14 +10,31 @@ import {
 } from "../../store/reducers/flipcards";
 import { actions as flipActions } from "../../store/actions/flipcards";
 
+import { ScoreState } from "../../store/reducers/score";
+import { actions as scoreActions } from "../../store/actions/score";
+
 import Card from "../../components/Card";
+import Score from "../../components/Score";
 
 const CardGame = () => {
   const dispatch = useDispatch();
 
-  const { data, firstFlip, secondFlip } = useSelector<State, FlipCardState>(
-    (s) => s.flipcard
-  );
+  const { data, firstFlip, secondFlip, complete } = useSelector<
+    State,
+    FlipCardState
+  >((s) => s.flipcard);
+
+  React.useEffect(() => {
+    if (complete) {
+      Alert.alert(
+        "Congratulation",
+        `You have finished this game in ${steps} steps`,
+        [{ text: "Play Again!", onPress: onClickRestart }]
+      );
+    }
+  }, [complete]);
+
+  const { steps } = useSelector<State, ScoreState>((s) => s.score);
 
   React.useEffect(() => {
     dispatch(flipActions.getRandomCardValues());
@@ -50,6 +68,7 @@ const CardGame = () => {
         dispatch(flipActions.setFirstFlip(data.id));
         setTimeOutId(0);
       }
+      dispatch(scoreActions.incrementScore());
     }
   };
 
@@ -62,8 +81,19 @@ const CardGame = () => {
     dispatch(flipActions.resetFlips());
   };
 
+  const onClickRestart = () => {
+    dispatch(flipActions.getRandomCardValues());
+    dispatch(scoreActions.resetScore());
+  };
+
   return (
     <Container>
+      <ScoreContainer>
+        <TouchableOpacity onPress={onClickRestart}>
+          <TextButton>Restart</TextButton>
+        </TouchableOpacity>
+        <Score points={steps} />
+      </ScoreContainer>
       {data.map((data) => (
         <InnerContainer key={data.id}>
           <Card
@@ -90,6 +120,20 @@ const Container = styled.SafeAreaView`
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+`;
+
+const ScoreContainer = styled.View`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  padding: 16px;
+`;
+
+const TextButton = styled.Text`
+  color: white;
+  font-size: 22px;
+  font-weight: 400;
 `;
 
 const InnerContainer = styled.View`

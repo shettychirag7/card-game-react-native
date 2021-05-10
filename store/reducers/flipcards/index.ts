@@ -7,6 +7,7 @@ export interface FlipCardState {
   data: Card[];
   firstFlip?: Card;
   secondFlip?: Card;
+  complete?: boolean;
 }
 
 export interface Card {
@@ -18,6 +19,7 @@ export interface Card {
 
 const initialState: FlipCardState = {
   data: [],
+  complete: false,
 };
 
 const flipCardReducer = (state = initialState, action: AnyAction) => {
@@ -32,11 +34,15 @@ const flipCardReducer = (state = initialState, action: AnyAction) => {
           flipped: false,
           enabled: true,
         })),
+        firstFlip: null,
+        secondFlip: null,
+        complete: false,
       };
     }
     case types.SET_FIRST_FLIP: {
       const id = action.payload;
       const prevData = [...state.data];
+
       return {
         ...state,
         firstFlip: { ...prevData[id], flipped: true },
@@ -50,14 +56,17 @@ const flipCardReducer = (state = initialState, action: AnyAction) => {
     case types.SET_SECOND_FLIP: {
       const id = action.payload;
       const prevData = [...state.data];
+      const nextData = [
+        ...prevData.slice(0, id),
+        { ...prevData[id], flipped: !prevData[id].flipped },
+        ...prevData.slice(id + 1),
+      ];
       return {
         ...state,
         secondFlip: { ...prevData[id], flipped: true },
-        data: [
-          ...prevData.slice(0, id),
-          { ...prevData[id], flipped: !prevData[id].flipped },
-          ...prevData.slice(id + 1),
-        ],
+        data: nextData,
+        complete:
+          nextData.filter((item) => item.flipped === false).length === 0,
       };
     }
     case types.RESET_FLIPS: {
