@@ -17,7 +17,7 @@ describe("Card Component Tests", () => {
   it("must execute onClick callback on click of card", () => {
     const mockFn = jest.fn();
     const { getByText } = render(
-      <Card data={{ front: "?", back: "1" }} onClick={mockFn} />
+      <Card data={{ front: "?", back: "1" }} onClick={mockFn} enabled={true} />
     );
     const element = getByText("?");
     fireEvent.press(element);
@@ -47,8 +47,13 @@ describe("Card Component Tests", () => {
       frontAnimatedStyle: { transform: [] },
       backAnimatedStyle: { transform: [] },
     });
-    const { getByTestId } = render(
-      <Card testID="mock" data={{ front: "?", back: "1" }} flip={true} />
+    render(
+      <Card
+        testID="mock"
+        data={{ front: "?", back: "1" }}
+        flip={true}
+        enabled={true}
+      />
     );
     expect(mockFn).toHaveBeenCalledTimes(1);
   });
