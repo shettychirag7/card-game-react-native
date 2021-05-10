@@ -32,9 +32,11 @@ export interface CardProps extends ViewProps {
    * callback function to execute on click of card component
    */
   onClick?: () => void;
+
+  enabled?: boolean;
 }
 
-const Card = ({ data, flip, onClick, ...rest }: CardProps) => {
+const Card = ({ data, flip, enabled, onClick, ...rest }: CardProps) => {
   const {
     frontAnimatedStyle,
     backAnimatedStyle,
@@ -54,7 +56,7 @@ const Card = ({ data, flip, onClick, ...rest }: CardProps) => {
 
   return (
     <View {...rest}>
-      <TouchableOpacity onPress={onClickCard}>
+      <TouchableOpacity onPress={onClickCard} disabled={!enabled}>
         <Animated.View
           style={[styles.card, styles.backCard, backAnimatedStyle]}
           testID="back"
